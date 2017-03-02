@@ -1,3 +1,8 @@
+//
+// Created by Zhe Wang on 3/1/17.
+//
+
+
 // A simple socket server, refer to: UCSD CSE124 HW2
 
 #include <stdio.h>
@@ -9,13 +14,45 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <netdb.h>
 #include <string>
+#include <map>
+#include "Controller.h"
+#include "Command.h"
 
 using std::string;
 
-static const int MAXPENDING = 5; // Maximum outstanding connection requests
+static const int MAXPENDING = 5; // Maximum outstanding connection requests (pending commands)
 const int BUFSIZE = 1024; // TCP datagram buffer
+KobukiController controller; // Kobuki controller
+
+
+void handleCommand(const char* cmd){
+    Command command = Command(cmd);
+
+    switch (command.getCmdType()) {
+        case Constants::MOVE: {
+            controller.move(atof(command.getPara(Constants::speed).c_str()), atoi(command.getPara(Constants::time).c_str()));
+            if (command.getPara(Constants::stop) == "true"){
+                controller.stop();
+            }
+            break;
+        }
+        case Constants::ROTATE: {
+            controller.rotate(atof(command.getPara(Constants::speed).c_str()), atoi(command.getPara(Constants::time).c_str()));
+            if (command.getPara(Constants::stop) == "true"){
+                controller.stop();
+            }
+            break;
+        }
+        case Constants::STOP: {
+            controller.stop();
+            break;
+        }
+        // invalid command
+        assert(false);
+
+    }
+}
 
 void DieWithSystemMessage(const char *msg) {
   perror(msg);
@@ -23,24 +60,24 @@ void DieWithSystemMessage(const char *msg) {
 }
 
 void HandleTCPClient(int clntSocket, int n) {
-    printf("call HandleTCPClient() \n");
-  char buffer[BUFSIZE]; // Buffer for echo string
+  printf("call HandleTCPClient() \n");
+  char buffer[BUFSIZE]; // Buffer recving command
   ssize_t numBytesRcvd;
   size_t totaBytesRcvd = 0;
-  //numBytesRcvd = recv(clntSocket, buffer + totaBytesRcvd, BUFSIZE - totaBytesRcvd, 0);
 
   // // Keep receiving until it got a null char
   while (true) {
-      // Receive message from client
-      printf("call recv() \n");
-      numBytesRcvd = recv(clntSocket, buffer + totaBytesRcvd, BUFSIZE - totaBytesRcvd, 0);
-      totaBytesRcvd += numBytesRcvd;
-      if (numBytesRcvd < 0)
-          DieWithSystemMessage("recv() failed");
-      // '\0' is guaranteed to on the boundary at some time
-      if (buffer[totaBytesRcvd - 1] == '\0')
-          break;
+    // Receive message from client
+    printf("call recv() \n");
+    numBytesRcvd = recv(clntSocket, buffer + totaBytesRcvd, BUFSIZE - totaBytesRcvd, 0);
+    totaBytesRcvd += numBytesRcvd;
+    if (numBytesRcvd < 0)
+      DieWithSystemMessage("recv() failed");
+    // '\0' is guaranteed to on the boundary at some time
+    if (buffer[totaBytesRcvd - 1] == '\0')
+      break;
   }
+  handleCommand(buffer);
   string response = string(buffer) + "received";
   send(clntSocket, response.c_str(), response.size(), 0); // todo check sent byte error
   close(clntSocket); // Close client socket
@@ -84,6 +121,7 @@ int main(int argc, char *argv[]) {
     socklen_t clntAddrLen = sizeof(clntAddr);
 
     // Wait for a client to connect
+    printf("call accept() \n");
     int clntSock = accept(servSock, (struct sockaddr *) &clntAddr, &clntAddrLen);
     if (clntSock < 0)
       DieWithSystemMessage("accept() failed");
@@ -92,7 +130,7 @@ int main(int argc, char *argv[]) {
 
     char clntName[INET_ADDRSTRLEN]; // String to contain client address
     if (inet_ntop(AF_INET, &clntAddr.sin_addr.s_addr, clntName,
-        sizeof(clntName)) != NULL)
+                  sizeof(clntName)) != NULL)
       printf("Handling client %s/%d\n", clntName, ntohs(clntAddr.sin_port));
     else
       puts("Unable to get client address");

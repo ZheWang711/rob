@@ -32,18 +32,37 @@ public:
     // initialise - it will throw an exception if parameter validation or initialisation fails.
     try {
       kobuki.init(parameters);
-      kobuki.setBaseControl(0.0,0.3); // first argument: linear velocity, second argument: angular velocity
-      kobuki.sendBaseControlCommand();
     } catch ( ecl::StandardException &e ) {
       std::cout << e.what();
     }
   }
+
+  // first argument: <double> angular velocity (rad/s); second argument: <int> time (second)
+  void rotate(double radPerSec, int dur){
+      kobuki.setBaseControl(0.0, radPerSec);
+      kobuki.sendBaseControlCommand();
+      ecl::Sleep()(dur);
+  }
+
+  // first argument: <double> speed (m/s); second argument: <int> time (second)
+  void move(double meterPerSec, int dur){
+      kobuki.setBaseControl(meterPerSec, 0.0);
+      kobuki.sendBaseControlCommand();
+      ecl::Sleep()(dur);
+  }
+
 private:
   kobuki::Kobuki kobuki;
 };
 
 int main() {
   KobukiManager kobuki_manager;
-  ecl::Sleep()(5);
+  //kobuki_manager.rotate(2, 2);
+  kobuki_manager.move(-0.5, 1);
+  printf("%s\n", "lalala");
+  kobuki_manager.move(-0.5, 1);
+  //ecl::Sleep()(2);
+  //kobuki_manager.rotate(-2, 2);
+  //ecl::Sleep()(2);
   return 0;
 }
