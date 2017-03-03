@@ -6,7 +6,7 @@ The system can be break into 2 pieces, a server writing in C++ running on raspbe
 
 # How to run
 ## On Raspberry PI
-* put the `server` folder into `~/kobuki_core/src/kobuki_core/kobuki_driver/src/test/`
+* Create a folder from `~/kobuki_core/src/kobuki_core/kobuki_driver/src/test/` named `server`, and put the repository in it
 * add the following lines into `~/kobuki_core/src/kobuki_core/kobuki_driver/src/test/CMakeList.txt`
 ```
 add_executable(simple_test server/initialisation.cpp)
