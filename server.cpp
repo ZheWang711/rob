@@ -68,8 +68,8 @@ void handleGetData(int clntSocket){
     send_buffer[msg.length()] = '\0';
 
     int *x = data_buffer;
-    printf("data_buffer %x, %x, %x, %x, %x, %x, %x, %x \n", x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7]);
-    printf("send buffer %s\n", send_buffer); // TODO delete debug
+    //printf("data_buffer %x, %x, %x, %x, %x, %x, %x, %x \n", x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7]);
+    //printf("send buffer %s\n", send_buffer); // TODO delete debug
     send(clntSocket, send_buffer, msg.length() + 1 , 0); // todo check sent byte error
     delete data_buffer;
     delete send_buffer;

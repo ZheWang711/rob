@@ -17,12 +17,31 @@ def send_msg(msg):
     s.send(msg)
     s.close()
 
+# x[0] = (data.buttons & 0x01) >> 0; // botton0
+# x[1] = (data.buttons & 0x02) >> 1; // botton1
+# x[2] = (data.buttons & 0x04) >> 2; // botton2
+# x[3] = (data.wheel_drop & 0x02) >> 1; // left wheel
+# x[4] = (data.wheel_drop & 0x01) >> 0; // right wheel
+# x[5] = (data.bumper & 0x04) >> 2; // left bumper
+# x[6] = (data.bumper & 0x02) >> 1; // center bumper
+# x[7] = (data.bumper & 0x01) >> 0; // right bumper
+
 def get_data():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, DATAPORT))
     s.send("getdata" + '\0')
     data = s.recv(1024)
-    print data
+    #print data, len(data)
+    X = [int(x) for x in data[:-1].split(',')]
+    print "botton0:", X[0]
+    print "botton1:", X[1]
+    print "botton2:", X[2]
+    print "left wheel drop:", X[3]
+    print "right wheel drop:", X[4]
+    print "left bumper touched", X[5]
+    print "center bumper touched", X[6]
+    print "right bumper touched", X[7]
+
     s.close()
 
 
