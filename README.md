@@ -21,6 +21,7 @@ target_link_libraries(demo_kobuki_simple_server kobuki)
 export PATH=~/kobuki_core/src/catkin/bin/:${PATH}
 export LD_LIBRARY_PATH=~/kobuki_core/install/lib
 ```
+* compile `catkin_make`
 * execute `/home/pi/kobuki_core/devel/lib/kobuki_driver/demo_kobuki_simple_server 10080 10081`
 
 ## On Client
