@@ -10,6 +10,7 @@
 #include <iostream>
 #include <kobuki_driver/kobuki.hpp>
 #include <ecl/time.hpp>
+#include <unistd.h>
 
 class KobukiManager {
 public:
@@ -51,6 +52,16 @@ public:
       ecl::Sleep()(dur);
   }
 
+  void getSensorData(){
+      kobuki.lockDataAccess();
+      kobuki::CoreSensors::Data data = kobuki.getCoreSensorData();
+      kobuki.unlockDataAccess();
+
+      //printf("botton0: %x, botton1: %x, botton2: %x\n", (data.buttons & 0x01) >> 0, (data.buttons & 0x02) >> 1, (data.buttons & 0x04) >> 2);
+      //printf("left wheel: %x, right wheel: %x\n", (data.wheel_drop & 0x02) >> 1, (data.wheel_drop & 0x01) >> 0);
+      printf("left bumper: %x, center bumper: %x, right bumper: %x\n", (data.bumper & 0x04) >> 2, (data.bumper & 0x02) >> 1, (data.bumper & 0x01) >> 0);
+  }
+
 private:
   kobuki::Kobuki kobuki;
 };
@@ -58,11 +69,19 @@ private:
 int main() {
   KobukiManager kobuki_manager;
   //kobuki_manager.rotate(2, 2);
-  kobuki_manager.move(-0.5, 1);
-  printf("%s\n", "lalala");
-  kobuki_manager.move(-0.5, 1);
+  // kobuki_manager.move(-0.5, 1);
+  // printf("%s\n", "lalala");
+  // kobuki_manager.move(-0.5, 1);
   //ecl::Sleep()(2);
   //kobuki_manager.rotate(-2, 2);
   //ecl::Sleep()(2);
+  while (true){
+
+      kobuki_manager.getSensorData();
+      usleep(500000);
+
+
+  }
+
   return 0;
 }

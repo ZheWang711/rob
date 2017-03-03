@@ -2,9 +2,10 @@ import socket
 import time
 from math import pi
 
-HOST = '192.168.0.20'    # OD's home wifi
-#HOST = '172.20.10.4'    # my iphone
-PORT = 10086
+#HOST = '192.168.0.20'    # OD's home wifi
+HOST = '172.20.10.4'    # my iphone
+PORT = 10080
+DATAPORT = 10081
 
 rotate_time = 5
 move_speed = 0.1
@@ -14,6 +15,14 @@ def send_msg(msg):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, PORT))
     s.send(msg)
+    s.close()
+
+def get_data():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((HOST, DATAPORT))
+    s.send("getdata" + '\0')
+    data = s.recv(1024)
+    print data
     s.close()
 
 
@@ -121,7 +130,15 @@ if __name__ == "__main__":
         rob.status()
 
     def turn(degree):
-        rob.turn(degree)
+
+        r = abs(degree) / 180
+        c = abs(degree) % 180
+        couter_clock = 1 if degree > 0 else -1
+
+        for i in range(r):
+            rob.turn(couter_clock * 180)
+        rob.turn(couter_clock * c)
+
         rob.status()
 
     def goto(x, y):
